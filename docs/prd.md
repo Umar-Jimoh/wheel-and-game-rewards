@@ -331,7 +331,7 @@ Core domain objects:
 - Wheel
 - Reward
 - Multiplier
-- Points
+- Point
 
 ---
 
