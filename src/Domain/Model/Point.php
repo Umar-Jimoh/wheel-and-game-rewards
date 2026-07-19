@@ -39,4 +39,10 @@ final class Point {
 
         return new Point($difference);
     }
+
+    public function multiplyBy(int $multiplier): Point
+    {
+        $point = $this->amount * $multiplier;
+        return new Point($point);
+    }
 }

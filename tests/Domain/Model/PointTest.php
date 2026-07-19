@@ -72,4 +72,13 @@ final class PointTest extends TestCase
 
         $this->assertEquals(new Point(0), $point->subtract($point2));
     }
+
+    public function testMultiplyByReturnsMyltipliedPoint(): void
+    {
+        $point = new Point(500);
+
+        $multipliedPoint = $point->multiplyBy(3);
+
+        $this->assertEquals(new Point(1500), $multipliedPoint);
+    }
 }
