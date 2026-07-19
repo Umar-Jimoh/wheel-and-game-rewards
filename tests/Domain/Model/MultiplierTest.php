@@ -14,27 +14,27 @@ final class MultiplierTest extends TestCase
     {
         $multipliedPoint = Multiplier::NONE->applyTo(new Point(1000));
 
-        $this->assertEquals(new Point(0), $multipliedPoint);
+        $this->assertObjectEquals(new Point(0), $multipliedPoint);
     }
 
     public function testApplyToMultiplierX2(): void
     {
         $multipliedPoint = Multiplier::X2->applyTo(new Point(1000));
 
-        $this->assertEquals(new Point(2000), $multipliedPoint);
+        $this->assertObjectEquals(new Point(2000), $multipliedPoint);
     }
 
     public function testApplyToMultiplierX3(): void
     {
         $multipliedPoint = Multiplier::X3->applyTo(new Point(1000));
 
-        $this->assertEquals(new Point(3000), $multipliedPoint);
+        $this->assertObjectEquals(new Point(3000), $multipliedPoint);
     }
 
     public function testApplyToMultiplierX4(): void
     {
         $multipliedPoint = Multiplier::X4->applyTo(new Point(1000));
 
-        $this->assertEquals(new Point(4000), $multipliedPoint);
+        $this->assertObjectEquals(new Point(4000), $multipliedPoint);
     }
 }

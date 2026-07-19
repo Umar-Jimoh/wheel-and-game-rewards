@@ -45,7 +45,7 @@ final class PointTest extends TestCase
         $point = new Point(2);
         $point2 = new Point(3);
 
-        $this->assertEquals(new Point(5), $point->add($point2));
+        $this->assertObjectEquals(new Point(5), $point->add($point2));
     }
 
     public function testSubtractReturnsCorrectDifferenceWhenSufficient(): void
@@ -53,7 +53,7 @@ final class PointTest extends TestCase
         $point = new Point(2);
         $point2 = new Point(3);
         
-        $this->assertEquals(new Point(1), $point2->subtract($point));
+        $this->assertObjectEquals(new Point(1), $point2->subtract($point));
     }
 
         public function testSubtractThrowsWhenInsufficient(): void
@@ -70,7 +70,7 @@ final class PointTest extends TestCase
         $point = new Point(3);
         $point2 = new Point(3);
 
-        $this->assertEquals(new Point(0), $point->subtract($point2));
+        $this->assertObjectEquals(new Point(0), $point->subtract($point2));
     }
 
     public function testMultiplyByReturnsMyltipliedPoint(): void
@@ -79,6 +79,24 @@ final class PointTest extends TestCase
 
         $multipliedPoint = $point->multiplyBy(3);
 
-        $this->assertEquals(new Point(1500), $multipliedPoint);
+        $this->assertObjectEquals(new Point(1500), $multipliedPoint);
+    }
+
+    public function testEqualsReturnTrueForSamePointAmount(): void
+    {
+        $point = new Point(5);
+
+        $point2 = new Point(5);
+
+        $this->assertTrue($point->equals($point2));
+    }
+
+    public function testEqualsReturnFalseForDifferentPointAmount(): void
+    {
+        $point = new Point(5);
+
+        $point2 = new Point(3);
+
+        $this->assertFalse($point->equals($point2));
     }
 }

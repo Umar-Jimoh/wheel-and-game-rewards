@@ -32,6 +32,6 @@ final class SpinCostTest extends TestCase
 
         $points = new Point($validCost);
 
-        $this->assertEquals($points, $spinCost->toPoint());
+        $this->assertObjectEquals($points, $spinCost->toPoint());
     }
 }

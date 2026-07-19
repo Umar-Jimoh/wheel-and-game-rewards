@@ -40,7 +40,7 @@ final class UserTest extends TestCase
 
         $user->addPoints($point);
 
-        $this->assertEquals(new Point(4), $user->getBalance());
+        $this->assertObjectEquals(new Point(4), $user->getBalance());
     }
 
     public function testHasEnoughPointsReturnsTrueWhenPointIsEnough(): void
@@ -78,7 +78,7 @@ final class UserTest extends TestCase
 
         $user->deductPoints($deductedPoint);
 
-        $this->assertEquals(new Point(3), $user->getBalance());
+        $this->assertObjectEquals(new Point(3), $user->getBalance());
 
     }
 }

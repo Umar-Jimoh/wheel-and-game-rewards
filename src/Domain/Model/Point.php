@@ -45,4 +45,9 @@ final class Point {
         $point = $this->amount * $multiplier;
         return new Point($point);
     }
+
+    public function equals(self $other): bool
+    {
+        return $this->amount === $other->amount;
+    }
 }
