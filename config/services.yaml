@@ -9,6 +9,10 @@
 parameters:
 
 services:
+    App\Application\Port\Out\UserRepository: '@App\Infrastructure\Persistence\InMemory\InMemoryUserRepository'
+    App\Application\Port\Out\RandomMultiplierGenerator: '@App\Infrastructure\Random\RandomMultiplierGenerator'
+
+    
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.

@@ -16,6 +16,11 @@ final class Point {
         }
     }
 
+    public function getAmount(): int
+    {
+        return $this->amount;
+    }
+
     public function isGreaterThanOrEqualTo(Point $other): bool
     {
         $difference = $this->amount - $other->amount;
