@@ -15,4 +15,9 @@ enum Multiplier: int
     {
         return $cost->multiplyBy($this->value);
     }
+
+    public function label(): string
+    {
+        return $this === self::NONE ? '0' : "{$this->value}X";
+    }
 }

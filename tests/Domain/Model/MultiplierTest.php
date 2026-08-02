@@ -37,4 +37,18 @@ final class MultiplierTest extends TestCase
 
         $this->assertObjectEquals(new Point(4000), $multipliedPoint);
     }
+
+    public function testLabelReturnsZeroWhenMultiplierIsNone(): void
+    {
+        $multiplier = Multiplier::NONE->label();
+
+        $this->assertEquals('0', $multiplier);
+    }
+
+    public function testLabelReturnsMultiplier(): void
+    {
+        $multiplier = Multiplier::X2->label();
+
+        $this->assertEquals('2X', $multiplier);
+    }
 }

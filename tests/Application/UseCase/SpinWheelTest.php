@@ -66,7 +66,7 @@ final class SpinWheelTest extends TestCase
 
         $result = $spinWheel->execute(1, 500);
 
-        $this->assertSame(Multiplier::NONE->name, $result->multiplier);
+        $this->assertSame(Multiplier::NONE->label(), $result->multiplier);
     }
 
     public function testExecuteMultiplyWithX2(): void
@@ -84,7 +84,7 @@ final class SpinWheelTest extends TestCase
 
         $result = $spinWheel->execute(1, 500);
 
-        $this->assertSame(Multiplier::X2->name, $result->multiplier);
+        $this->assertSame(Multiplier::X2->label(), $result->multiplier);
     }
 
     public function testExecuteMultiplyWithX3(): void
@@ -102,7 +102,7 @@ final class SpinWheelTest extends TestCase
 
         $result = $spinWheel->execute(1, 500);
 
-        $this->assertSame(Multiplier::X3->name, $result->multiplier);
+        $this->assertSame(Multiplier::X3->label(), $result->multiplier);
     }
 
     public function testExecuteMultiplyWithX4(): void
@@ -120,7 +120,7 @@ final class SpinWheelTest extends TestCase
 
         $result = $spinWheel->execute(1, 500);
 
-        $this->assertSame(Multiplier::X4->name, $result->multiplier);
+        $this->assertSame(Multiplier::X4->label(), $result->multiplier);
     }
 
     public function testExecuteReturnsExpectedEarned(): void

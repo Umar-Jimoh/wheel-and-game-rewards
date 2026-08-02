@@ -46,7 +46,7 @@ final class SpinWheel implements SpinWheelUseCase
 
             $this->userRepository->save($user);
 
-            return SpinWheelResult::success($multiplier->name, $reward->getAmount(), $user->getBalance()->getAmount());
+            return SpinWheelResult::success($multiplier->label(), $reward->getAmount(), $user->getBalance()->getAmount());
         } catch (SpinCostException $e) {
             return SpinWheelResult::failure($e->getMessage());
         }
