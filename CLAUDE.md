@@ -51,16 +51,38 @@ for the reasoning — it's a good reference for this distinction elsewhere in th
 - UI: `SpinWheelCommand` (`php bin/console wheel:spin <userId> <cost>`)
 - Tests exist for all of the above (mirrors `src/` structure under `tests/`)
 
+### Built (Get Balance, end-to-end)
+
+- Application: `GetBalanceUseCase` port, `GetBalance` use case, `GetBalanceResult` DTO
+- UI: `GetBalanceCommand` (`php bin/console balance:get <userId>`) — note the PRD (§8)
+  names this `user:balance`; the implemented command name diverges from the spec
+- Tests exist for the use case and the command
+
+### PRD deviation: Task → Game
+
+The original PRD (§4.2) had an admin-defined static task list ("Daily Login" → 50pts,
+etc.) — dropped in favor of a **system-generated number-guessing game**, since there's
+no admin in scope to define tasks. `docs/prd.md` has been updated to reflect this
+(§3, §4.2, §5 BR-006/BR-007, §6 UC-001, §7, §8, §9, §10, §11, §12). Mechanic:
+
+- System generates 5 random numbers.
+- User picks one of the 5 positions and guesses odd or even for the number there.
+- Free to play (BR-006) — no points deducted either way.
+- Correct guess → fixed reward (BR-007). Incorrect guess → nothing awarded, nothing lost.
+
+Not yet implemented: `Game` domain model, `PlayGameUseCase` port, `PlayGame` use case,
+`RandomNumberGenerator` output port, `game:play` CLI command.
+
 ### Not yet built (per PRD)
 
-- **CompleteTask** use case + `task:complete` CLI command (PRD §4.2, §10) — no `Task` domain model yet
-- **GetBalance** use case + `user:balance` CLI command (PRD §10)
+- **PlayGame** use case + `game:play` CLI command (PRD §4.2, §6, §10) — no `Game`
+  domain model or `RandomNumberGenerator` output port yet (see deviation note above)
 - **Spin recording (BR-005)**: "every spin must be recorded" is *not implemented* —
   `SpinWheel::execute()` doesn't create/persist a `Spin` record. No `Spin` domain model
   or `SpinRepository` port/adapter exists yet.
 - **`Wheel` and `Reward` domain models** (PRD §9) — currently `Multiplier::applyTo()`
   on `Point` does the reward calculation inline; there's no explicit `Wheel` or `Reward` object
-- HTTP adapters (controllers for `POST /tasks/complete`, `POST /wheel/spin`, `GET /users/{id}/balance`) — CLI only so far
+- HTTP adapters (controllers for `POST /games/play`, `POST /wheel/spin`, `GET /users/{id}/balance`) — CLI only so far
 - Laravel migration (Phase 3) — not started; still pure Symfony
 
 ## Conventions observed in this codebase
@@ -85,11 +107,14 @@ for the reasoning — it's a good reference for this distinction elsewhere in th
 | BR-003 | Multiplier must be None/2x/3x/4x | `Multiplier` enum (closed set by construction) |
 | BR-004 | Reward added immediately after spin | `SpinWheel::execute()` calls `$user->addPoints($reward)` |
 | BR-005 | Every spin must be recorded | **Not yet implemented** — no `Spin` model/repository |
+| BR-006 | Playing the game is free (no points deducted either way) | **Not yet implemented** — no `Game`/`PlayGame` yet |
+| BR-007 | Correct guess → fixed reward; incorrect → nothing | **Not yet implemented** — no `Game`/`PlayGame` yet |
 
 ## Commands
 
 ```
-php bin/console wheel:spin <userId> <cost>   # only implemented CLI command so far
+php bin/console wheel:spin <userId> <cost>    # spin the wheel
+php bin/console balance:get <userId>          # view balance (PRD calls this user:balance)
 composer install
 ./bin/phpunit                                 # run tests
 ```

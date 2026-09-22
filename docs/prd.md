@@ -27,7 +27,7 @@ The project will be implemented in **Symfony** first and later migrated to **Lar
 
 ### In Scope
 
-- User earns points by completing tasks
+- User earns points by playing a number-guessing game
 - User spends points to spin a reward wheel
 - Wheel randomly returns a multiplier
 - User receives reward based on multiplier
@@ -58,22 +58,28 @@ A user has:
 
 ---
 
-## 4.2 Complete Task
+## 4.2 Play Game
 
-A user can complete a predefined task to earn points.
+A user can play a number-guessing game to earn points, free of charge — there is no
+admin-defined task list; the system itself generates each game.
 
-Example tasks:
+### How it works
 
-| Task | Reward |
-|------|--------|
-| Daily Login | 50 |
-| Watch Video | 100 |
-| Invite Friend | 500 |
+- The system randomly generates 5 numbers.
+- The user selects one of the 5 positions and guesses whether the number at that
+  position is odd or even.
+- The system reveals the number and checks the guess.
+
+| Outcome | Reward |
+|---------|--------|
+| Correct guess | 100 (fixed) |
+| Incorrect guess | 0 |
 
 ### Rules
 
-- Completing a task awards points.
-- Points are immediately added to the user's balance.
+- Playing the game costs nothing — no points are deducted, win or lose.
+- A correct guess immediately awards a fixed reward to the user's balance.
+- An incorrect guess awards nothing; the user's balance is unaffected.
 
 ---
 
@@ -231,17 +237,32 @@ Every spin must be recorded.
 
 ---
 
+## BR-006
+
+Playing the game is free — no points are deducted, win or lose.
+
+---
+
+## BR-007
+
+A correct guess awards a fixed reward; an incorrect guess awards nothing.
+
+---
+
 # 6. Use Cases
 
-## UC-001 Complete Task
+## UC-001 Play Game
 
 ### Input
 
 - User ID
-- Task
+- Selected position (0–4)
+- Guess (odd or even)
 
 ### Output
 
+- Win/lose result
+- Reward earned
 - Updated point balance
 
 ---
@@ -275,10 +296,10 @@ Every spin must be recorded.
 
 # 7. API Endpoints
 
-## Complete Task
+## Play Game
 
 ```
-POST /tasks/complete
+POST /games/play
 ```
 
 ---
@@ -301,10 +322,10 @@ GET /users/{id}/balance
 
 # 8. CLI Commands
 
-Complete Task
+Play Game
 
 ```
-php bin/console task:complete
+php bin/console game:play
 ```
 
 Spin Wheel
@@ -326,7 +347,7 @@ php bin/console user:balance
 Core domain objects:
 
 - User
-- Task
+- Game
 - Spin
 - Wheel
 - Reward
@@ -337,7 +358,7 @@ Core domain objects:
 
 # 10. Application Use Cases
 
-- CompleteTask
+- PlayGame
 - SpinWheel
 - GetBalance
 
@@ -347,7 +368,7 @@ Core domain objects:
 
 ## Input Ports
 
-- CompleteTaskUseCase
+- PlayGameUseCase
 - SpinWheelUseCase
 - GetBalanceUseCase
 
@@ -356,6 +377,7 @@ Core domain objects:
 - UserRepository
 - SpinRepository
 - RandomMultiplierGenerator
+- RandomNumberGenerator
 
 ---
 
@@ -373,6 +395,7 @@ Core domain objects:
 - Doctrine Repository (later)
 - Eloquent Repository (later)
 - Random Multiplier Generator
+- Random Number Generator (game)
 
 ---
 
@@ -418,7 +441,7 @@ Frameworks should only provide adapters and dependency injection.
 
 The project is considered complete when:
 
-- Users can earn points by completing tasks.
+- Users can earn points by playing the number-guessing game.
 - Users can spend points to spin the wheel.
 - Rewards are correctly calculated.
 - Spins are recorded.
