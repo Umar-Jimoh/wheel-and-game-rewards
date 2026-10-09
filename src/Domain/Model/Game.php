@@ -12,11 +12,11 @@ final class Game
         private readonly array $numbers,
     )
     {
-        if (count($numbers) !== 5) {
+        if (count($this->numbers) !== 5) {
             throw new InvalidArgumentException('Numbers array must contain exactly 5 elements.');
         }
 
-        foreach ($numbers as $number) {
+        foreach ($this->numbers as $number) {
             if (!is_int($number) || $number < 0) {
                 throw new InvalidArgumentException('Numbers array must contain only non-negative integers.');
             }

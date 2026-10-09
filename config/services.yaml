@@ -11,9 +11,11 @@ parameters:
 services:
     App\Application\Port\In\SpinWheelUseCase: '@App\Application\UseCase\SpinWheel'
     App\Application\Port\In\GetBalanceUseCase: '@App\Application\UseCase\GetBalance'
+    App\Application\Port\In\PlayGameUseCase: '@App\Application\UseCase\PlayGame'
 
     App\Application\Port\Out\UserRepository: '@App\Infrastructure\Persistence\InMemory\InMemoryUserRepository'
     App\Application\Port\Out\RandomMultiplierGenerator: '@App\Infrastructure\Random\RandomMultiplierGenerator'
+    App\Application\Port\Out\RandomNumberGenerator: '@App\Infrastructure\Random\RandomNumberGenerator'
 
     
     # default configuration for services in *this* file

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace App\Infrastructure\Random;
+
 use App\Domain\Model\Multiplier;
 use App\Application\Port\Out\RandomMultiplierGenerator as RandomMultiplierGeneratorInterface;
 
