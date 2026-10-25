@@ -6,17 +6,12 @@ namespace App\Application\Dto;
 
 final class PlayGameResult
 {
-    public function __construct(
-        private readonly bool $win,
-        private readonly ?int $earned,
-        private readonly ?int $balance,
-        private readonly ?string $errorMessage,
+    private function __construct(
+        public readonly bool $success,
+        public readonly ?int $earned,
+        public readonly ?int $balance,
+        public readonly ?string $errorMessage,
     ) {}
-
-    public function isWin(): bool
-    {
-        return $this->win;
-    }
 
     public static function success(int $earned, int $balance): self
     {

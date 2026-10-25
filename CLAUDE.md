@@ -54,8 +54,7 @@ for the reasoning — it's a good reference for this distinction elsewhere in th
 ### Built (Get Balance, end-to-end)
 
 - Application: `GetBalanceUseCase` port, `GetBalance` use case, `GetBalanceResult` DTO
-- UI: `GetBalanceCommand` (`php bin/console balance:get <userId>`) — note the PRD (§8)
-  names this `user:balance`; the implemented command name diverges from the spec
+- UI: `GetBalanceCommand` (`php bin/console user:balance <userId>`) — matches PRD §8
 - Tests exist for the use case and the command
 
 ### PRD deviation: Task → Game
@@ -70,13 +69,20 @@ no admin in scope to define tasks. `docs/prd.md` has been updated to reflect thi
 - Free to play (BR-006) — no points deducted either way.
 - Correct guess → fixed reward (BR-007). Incorrect guess → nothing awarded, nothing lost.
 
-Not yet implemented: `Game` domain model, `PlayGameUseCase` port, `PlayGame` use case,
-`RandomNumberGenerator` output port, `game:play` CLI command.
+### Built (Play Game, end-to-end)
+
+- Domain: `Game` (holds the 5 drawn numbers, validates them, evaluates a guess), `Parity` enum
+- Application: `PlayGameUseCase` port, `PlayGame` use case, `PlayGameResult` DTO,
+  `RandomNumbersResult` DTO, `RandomNumberGenerator` output port
+- Infrastructure: `RandomNumberGenerator` adapter (uses `random_int(0, 9)` × 5)
+- UI: `PlayGameCommand` (`php bin/console game:play <userId>`) — interactive: shows the
+  5 drawn numbers, prompts for position + parity, confirms before locking in the guess
+- Tests exist for `Game`, `PlayGame` (invalid user / win / loss), the
+  `RandomNumberGenerator` adapter, and `PlayGameCommand` (all branches: missing
+  argument, invalid position, valid position, cancelled, win, loss)
 
 ### Not yet built (per PRD)
 
-- **PlayGame** use case + `game:play` CLI command (PRD §4.2, §6, §10) — no `Game`
-  domain model or `RandomNumberGenerator` output port yet (see deviation note above)
 - **Spin recording (BR-005)**: "every spin must be recorded" is *not implemented* —
   `SpinWheel::execute()` doesn't create/persist a `Spin` record. No `Spin` domain model
   or `SpinRepository` port/adapter exists yet.
@@ -107,14 +113,15 @@ Not yet implemented: `Game` domain model, `PlayGameUseCase` port, `PlayGame` use
 | BR-003 | Multiplier must be None/2x/3x/4x | `Multiplier` enum (closed set by construction) |
 | BR-004 | Reward added immediately after spin | `SpinWheel::execute()` calls `$user->addPoints($reward)` |
 | BR-005 | Every spin must be recorded | **Not yet implemented** — no `Spin` model/repository |
-| BR-006 | Playing the game is free (no points deducted either way) | **Not yet implemented** — no `Game`/`PlayGame` yet |
-| BR-007 | Correct guess → fixed reward; incorrect → nothing | **Not yet implemented** — no `Game`/`PlayGame` yet |
+| BR-006 | Playing the game is free (no points deducted either way) | `PlayGame::play()` never deducts; a loss leaves the balance untouched |
+| BR-007 | Correct guess → fixed reward; incorrect → nothing | `PlayGame::play()` awards a fixed `Point(100)` on a win via `Game::evaluate()`, nothing on a loss |
 
 ## Commands
 
 ```
 php bin/console wheel:spin <userId> <cost>    # spin the wheel
-php bin/console balance:get <userId>          # view balance (PRD calls this user:balance)
+php bin/console user:balance <userId>         # view balance
+php bin/console game:play <userId>            # play the number-guessing game (interactive)
 composer install
 ./bin/phpunit                                 # run tests
 ```
