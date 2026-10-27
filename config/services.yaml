@@ -14,6 +14,7 @@ services:
     App\Application\Port\In\PlayGameUseCase: '@App\Application\UseCase\PlayGame'
 
     App\Application\Port\Out\UserRepository: '@App\Infrastructure\Persistence\InMemory\InMemoryUserRepository'
+    App\Application\Port\Out\SpinRepository: '@App\Infrastructure\Persistence\InMemory\InMemorySpinRepository'
     App\Application\Port\Out\RandomMultiplierGenerator: '@App\Infrastructure\Random\RandomMultiplierGenerator'
     App\Application\Port\Out\RandomNumberGenerator: '@App\Infrastructure\Random\RandomNumberGenerator'
 

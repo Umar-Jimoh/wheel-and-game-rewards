@@ -10,8 +10,8 @@ use App\Domain\Model\Multiplier;
 use App\Application\UseCase\SpinWheel;
 use App\Application\Dto\SpinWheelResult;
 use PHPUnit\Framework\TestCase;
-use App\Domain\Exception\InsufficientPointsException;
 use App\Infrastructure\Persistence\InMemory\InMemoryUserRepository;
+use App\Infrastructure\Persistence\InMemory\InMemorySpinRepository;
 
 final class SpinWheelTest extends TestCase
 {
@@ -22,11 +22,15 @@ final class SpinWheelTest extends TestCase
         $user = new User(1, 'test user', new Point(30));
         
         $users->save($user);
+
+        $spins = new InMemorySpinRepository();
+
+        
         
         $multiplier = $this->createStub(\App\Application\Port\Out\RandomMultiplierGenerator::class);
         $multiplier->method('generate')->willReturn(Multiplier::X2);
 
-        $spinWheel = new SpinWheel($users, $multiplier);
+        $spinWheel = new SpinWheel($users, $spins, $multiplier);
 
         $result = $spinWheel->execute(5, 500);
 
@@ -44,7 +48,9 @@ final class SpinWheelTest extends TestCase
         $multiplier = $this->createStub(\App\Application\Port\Out\RandomMultiplierGenerator::class);
         $multiplier->method('generate')->willReturn(Multiplier::X2);
 
-        $spinWheel = new SpinWheel($users, $multiplier);
+        $spins = new InMemorySpinRepository();
+
+        $spinWheel = new SpinWheel($users, $spins, $multiplier);
 
         $result = $spinWheel->execute(1, 500);
 
@@ -62,7 +68,8 @@ final class SpinWheelTest extends TestCase
         $multiplier = $this->createStub(\App\Application\Port\Out\RandomMultiplierGenerator::class);
         $multiplier->method('generate')->willReturn(Multiplier::NONE);
 
-        $spinWheel = new SpinWheel($users, $multiplier);
+        $spins = new InMemorySpinRepository();
+        $spinWheel = new SpinWheel($users, $spins, $multiplier);
 
         $result = $spinWheel->execute(1, 500);
 
@@ -80,7 +87,9 @@ final class SpinWheelTest extends TestCase
         $multiplier = $this->createStub(\App\Application\Port\Out\RandomMultiplierGenerator::class);
         $multiplier->method('generate')->willReturn(Multiplier::X2);
 
-        $spinWheel = new SpinWheel($users, $multiplier);
+        $spins = new InMemorySpinRepository();
+
+        $spinWheel = new SpinWheel($users, $spins, $multiplier);
 
         $result = $spinWheel->execute(1, 500);
 
@@ -98,7 +107,9 @@ final class SpinWheelTest extends TestCase
         $multiplier = $this->createStub(\App\Application\Port\Out\RandomMultiplierGenerator::class);
         $multiplier->method('generate')->willReturn(Multiplier::X3);
 
-        $spinWheel = new SpinWheel($users, $multiplier);
+        $spins = new InMemorySpinRepository();
+        
+        $spinWheel = new SpinWheel($users, $spins, $multiplier);
 
         $result = $spinWheel->execute(1, 500);
 
@@ -116,7 +127,8 @@ final class SpinWheelTest extends TestCase
         $multiplier = $this->createStub(\App\Application\Port\Out\RandomMultiplierGenerator::class);
         $multiplier->method('generate')->willReturn(Multiplier::X4);
 
-        $spinWheel = new SpinWheel($users, $multiplier);
+        $spins = new InMemorySpinRepository();
+        $spinWheel = new SpinWheel($users, $spins, $multiplier);
 
         $result = $spinWheel->execute(1, 500);
 
@@ -134,7 +146,8 @@ final class SpinWheelTest extends TestCase
         $multiplier = $this->createStub(\App\Application\Port\Out\RandomMultiplierGenerator::class);
         $multiplier->method('generate')->willReturn(Multiplier::X2);
 
-        $spinWheel = new SpinWheel($users, $multiplier);
+        $spins = new InMemorySpinRepository();
+        $spinWheel = new SpinWheel($users, $spins, $multiplier);
 
         $spinCost = 500;
 
@@ -156,7 +169,9 @@ final class SpinWheelTest extends TestCase
         $multiplier = $this->createStub(\App\Application\Port\Out\RandomMultiplierGenerator::class);
         $multiplier->method('generate')->willReturn(Multiplier::X2);
 
-        $spinWheel = new SpinWheel($users, $multiplier);
+        $spins = new InMemorySpinRepository();
+        
+        $spinWheel = new SpinWheel($users, $spins, $multiplier);
 
         $spinCost = 500;
 
@@ -182,12 +197,43 @@ final class SpinWheelTest extends TestCase
         $multiplier = $this->createStub(\App\Application\Port\Out\RandomMultiplierGenerator::class);
         $multiplier->method('generate')->willReturn(Multiplier::X2);
 
-        $spinWheel = new SpinWheel($users, $multiplier);
+        $spins = new InMemorySpinRepository();
+        
+        $spinWheel = new SpinWheel($users, $spins, $multiplier);
 
         $spinWheel->execute(1, 500);
 
         $updatedUser = $users->findById(1);
 
         $this->assertSame(1500, $updatedUser->getBalance()->getAmount());
+    }
+
+    public function testExecuteSavesSpinRecord(): void
+    {
+        $users = new InMemoryUserRepository();
+
+        $user = new User(1, 'test user', new Point(1000));
+
+        $users->save($user);
+
+        $multiplier = $this->createStub(\App\Application\Port\Out\RandomMultiplierGenerator::class);
+        $multiplier->method('generate')->willReturn(Multiplier::X2);
+
+        $spins = new InMemorySpinRepository();
+        
+        $spinWheel = new SpinWheel($users, $spins, $multiplier);
+
+        $spinWheel->execute(1, 500);
+
+        $savedSpins = $spins->getAll();
+
+        $this->assertCount(1, $savedSpins);
+
+        $savedSpin = $savedSpins[0];
+
+        $this->assertSame(1, $savedSpin->getUserId());
+        $this->assertSame(500, $savedSpin->getSpinCost()->getAmount());
+        $this->assertSame(Multiplier::X2, $savedSpin->getMultiplierRolled());
+        $this->assertSame(1000, $savedSpin->getRewardedPoint()->getAmount());
     }
 }

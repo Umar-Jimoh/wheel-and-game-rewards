@@ -11,11 +11,14 @@ use App\Application\Port\In\SpinWheelUseCase;
 use App\Application\Port\Out\UserRepository;
 use App\Application\Port\Out\RandomMultiplierGenerator;
 use App\Application\Dto\SpinWheelResult;
+use App\Application\Port\Out\SpinRepository;
+use App\Domain\Model\Spin;
 
 final class SpinWheel implements SpinWheelUseCase
 {
     public function __construct(
         private readonly UserRepository $userRepository,
+        private readonly SpinRepository $spinRepository,
         private readonly RandomMultiplierGenerator $randomMultiplierGenerator,
     ){}
 
@@ -45,6 +48,9 @@ final class SpinWheel implements SpinWheelUseCase
             $user->addPoints($reward);
 
             $this->userRepository->save($user);
+
+            $spinRecord = new Spin($userId, $point, $multiplier, $reward);
+            $this->spinRepository->save($spinRecord);
 
             return SpinWheelResult::success($multiplier->label(), $reward->getAmount(), $user->getBalance()->getAmount());
         } catch (SpinCostException $e) {
