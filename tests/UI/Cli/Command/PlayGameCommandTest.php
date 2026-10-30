@@ -11,6 +11,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 use App\Application\Port\In\PlayGameUseCase;
 use App\Application\Port\In\StartGameUseCase;
 use App\Application\Dto\RandomNumbersResult;
+use App\Application\Dto\StartGameResult;
 use App\Application\Dto\PlayGameResult;
 
 class PlayGameCommandTest extends TestCase
@@ -28,12 +29,29 @@ class PlayGameCommandTest extends TestCase
         $commandTester->execute([]);
     }
 
+    public function testInvokeReturnsFailureWhenStartGameFails(): void
+    {
+        $playGameUseCase = $this->createMock(PlayGameUseCase::class);
+        $playGameUseCase->expects($this->never())->method('play');
+        $startGameUseCase = $this->createStub(StartGameUseCase::class);
+        $startGameUseCase->method('execute')
+            ->willReturn(StartGameResult::failure('Invalid user id provided.'));
+
+        $command = new PlayGameCommand($playGameUseCase, $startGameUseCase);
+        $commandTester = new CommandTester($command);
+
+        $commandTester->execute(['user-id' => 99]);
+
+        $this->assertStringContainsString('😔 Invalid user id provided.', $commandTester->getDisplay());
+        $this->assertSame(Command::FAILURE, $commandTester->getStatusCode());
+    }
+
     public function testPositionSelectedIsInvalid(): void
     {
         $playGameUseCase = $this->createStub(PlayGameUseCase::class);
         $startGameUseCase = $this->createStub(StartGameUseCase::class);
         $startGameUseCase->method('execute')
-            ->willReturn(new RandomNumbersResult([41, 73, 94, 15, 26]));
+            ->willReturn(StartGameResult::success(new RandomNumbersResult([41, 73, 94, 15, 26])));
 
         $command = new PlayGameCommand($playGameUseCase, $startGameUseCase);
         $commandTester = new CommandTester($command);
@@ -52,7 +70,7 @@ class PlayGameCommandTest extends TestCase
             ->willReturn(PlayGameResult::success(true, 100, 130));
         $startGameUseCase = $this->createStub(StartGameUseCase::class);
         $startGameUseCase->method('execute')
-            ->willReturn(new RandomNumbersResult([41, 73, 64, 15, 26]));
+            ->willReturn(StartGameResult::success(new RandomNumbersResult([41, 73, 64, 15, 26])));
 
         $command = new PlayGameCommand($playGameUseCase, $startGameUseCase);
         $commandTester = new CommandTester($command);
@@ -69,7 +87,7 @@ class PlayGameCommandTest extends TestCase
         $playGameUseCase->expects($this->never())->method('play');
         $startGameUseCase = $this->createStub(StartGameUseCase::class);
         $startGameUseCase->method('execute')
-            ->willReturn(new RandomNumbersResult([41, 73, 64, 15, 26]));
+            ->willReturn(StartGameResult::success(new RandomNumbersResult([41, 73, 64, 15, 26])));
 
         $command = new PlayGameCommand($playGameUseCase, $startGameUseCase);
         $commandTester = new CommandTester($command);
@@ -88,7 +106,7 @@ class PlayGameCommandTest extends TestCase
             ->willReturn(PlayGameResult::success(true, 100, 130));
         $startGameUseCase = $this->createStub(StartGameUseCase::class);
         $startGameUseCase->method('execute')
-            ->willReturn(new RandomNumbersResult([41, 73, 64, 15, 26]));
+            ->willReturn(StartGameResult::success(new RandomNumbersResult([41, 73, 64, 15, 26])));
 
         $command = new PlayGameCommand($playGameUseCase, $startGameUseCase);
         $commandTester = new CommandTester($command);
@@ -107,7 +125,7 @@ class PlayGameCommandTest extends TestCase
             ->willReturn(PlayGameResult::success(false, 0, 30));
         $startGameUseCase = $this->createStub(StartGameUseCase::class);
         $startGameUseCase->method('execute')
-            ->willReturn(new RandomNumbersResult([41, 73, 64, 15, 26]));
+            ->willReturn(StartGameResult::success(new RandomNumbersResult([41, 73, 64, 15, 26])));
 
         $command = new PlayGameCommand($playGameUseCase, $startGameUseCase);
         $commandTester = new CommandTester($command);

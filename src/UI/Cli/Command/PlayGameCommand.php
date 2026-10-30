@@ -33,7 +33,13 @@ class PlayGameCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $generatedNumbers = $this->startGameUseCase->execute($userId);
-        $numbers = $generatedNumbers->getNumbers();
+
+        if (! $generatedNumbers->success) {
+            $io->error("😔 {$generatedNumbers->errorMessage}");
+            return Command::FAILURE;
+        }
+
+        $numbers = $generatedNumbers->numbers->getNumbers();
 
         $io->title("🎲 Game Started for User ID: <info>{$userId}</info>");
         $io->text('Pick a position and guess whether its number is odd or even. Playing is free — win 100 points, or lose nothing.');
