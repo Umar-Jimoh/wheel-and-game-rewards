@@ -33,4 +33,10 @@ final class Game
 
         return $parity->matches($selectedNumber);
     }
+
+    // Display-only accessor (e.g. showing the drawn numbers in a CLI/HTTP response) — game logic must go through evaluate().
+    public function getNumbers(): array
+    {
+        return $this->numbers;
+    }
 }

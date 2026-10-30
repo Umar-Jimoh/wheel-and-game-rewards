@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\Application\UseCase;
 
 use App\Application\Dto\PlayGameResult;
-use App\Application\Dto\RandomNumbersResult;
-use App\Application\Port\Out\RandomNumberGenerator;
 use App\Application\UseCase\PlayGame;
+use App\Domain\Model\Game;
 use App\Domain\Model\Parity;
+use App\Domain\Model\PendingGame;
 use App\Domain\Model\Point;
 use App\Domain\Model\User;
+use App\Infrastructure\Persistence\InMemory\InMemoryPendingGameRepository;
 use App\Infrastructure\Persistence\InMemory\InMemoryUserRepository;
 use PHPUnit\Framework\TestCase;
 
@@ -24,16 +25,30 @@ final class PlayGameTest extends TestCase
 
         $users->save($user);
 
-        $randomNumberGenerator = $this->createStub(RandomNumberGenerator::class);
-        $randomNumberGenerator->method('generate')->willReturn(new RandomNumbersResult([41, 73, 94, 15, 26]));
+        $pendingGames = new InMemoryPendingGameRepository();
 
-        $game = new PlayGame($randomNumberGenerator, $users);
+        $game = new PlayGame($users, $pendingGames);
 
-        $numbers = new RandomNumbersResult([41, 73, 94, 15, 26]);
-
-        $result = $game->play(2, $numbers, 1, Parity::EVEN);
+        $result = $game->play(2, 1, Parity::EVEN);
 
         $this->assertEquals(PlayGameResult::failure('Invalid user id provided.'), $result);
+    }
+
+    public function testPlayGameReturnsFailureWhenNoPendingGameExistsForUser(): void
+    {
+        $users = new InMemoryUserRepository();
+
+        $user = new User(1, 'test user', new Point(30));
+
+        $users->save($user);
+
+        $pendingGames = new InMemoryPendingGameRepository();
+
+        $game = new PlayGame($users, $pendingGames);
+
+        $result = $game->play(1, 0, Parity::EVEN);
+
+        $this->assertEquals(PlayGameResult::failure('No pending game found for the user.'), $result);
     }
 
     public function testPlayGameReturnsSuccessWhenGuessMatchesParity(): void
@@ -44,18 +59,18 @@ final class PlayGameTest extends TestCase
 
         $users->save($user);
 
-        $randomNumberGenerator = $this->createStub(RandomNumberGenerator::class);
+        $pendingGames = new InMemoryPendingGameRepository();
 
-        $game = new PlayGame($randomNumberGenerator, $users);
+        $pendingGames->save(new PendingGame(1, new Game([41, 73, 94, 15, 26])));
 
-        $numbers = new RandomNumbersResult([41, 73, 94, 15, 26]);
+        $game = new PlayGame($users, $pendingGames);
 
-        $result = $game->play(1, $numbers, 0, Parity::ODD);
+        $result = $game->play(1, 0, Parity::ODD);
 
-        $this->assertEquals(PlayGameResult::success(100, 130), $result);
+        $this->assertEquals(PlayGameResult::success(true, 100, 130), $result);
     }
 
-    public function testPlayGameReturnsFailureWhenGuessDoesNotMatchParity(): void
+    public function testPlayGameReturnsLossWhenGuessDoesNotMatchParity(): void
     {
         $users = new InMemoryUserRepository();
 
@@ -63,15 +78,15 @@ final class PlayGameTest extends TestCase
 
         $users->save($user);
 
-        $randomNumberGenerator = $this->createStub(RandomNumberGenerator::class);
+        $pendingGames = new InMemoryPendingGameRepository();
 
-        $game = new PlayGame($randomNumberGenerator, $users);
+        $pendingGames->save(new PendingGame(1, new Game([41, 73, 94, 15, 26])));
 
-        $numbers = new RandomNumbersResult([41, 73, 94, 15, 26]);
+        $game = new PlayGame($users, $pendingGames);
 
-        $result = $game->play(1, $numbers, 0, Parity::EVEN);
+        $result = $game->play(1, 0, Parity::EVEN);
 
-        $this->assertEquals(PlayGameResult::failure('You lost the game. Try again!'), $result);
+        $this->assertEquals(PlayGameResult::success(false, 0, 30), $result);
         $this->assertSame(30, $user->getBalance()->getAmount());
     }
 }

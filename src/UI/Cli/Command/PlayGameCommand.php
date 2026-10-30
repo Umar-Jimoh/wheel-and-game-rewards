@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\UI\Cli\Command;
 
 use App\Application\Port\In\PlayGameUseCase;
+use App\Application\Port\In\StartGameUseCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -18,6 +19,7 @@ class PlayGameCommand extends Command
 {
     public function __construct(
         private readonly PlayGameUseCase $playGameUseCase,
+        private readonly StartGameUseCase $startGameUseCase,
     ){
         parent::__construct();
     }
@@ -30,7 +32,7 @@ class PlayGameCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $generatedNumbers = $this->playGameUseCase->generateRandomNumbers();
+        $generatedNumbers = $this->startGameUseCase->execute($userId);
         $numbers = $generatedNumbers->getNumbers();
 
         $io->title("🎲 Game Started for User ID: <info>{$userId}</info>");
@@ -57,14 +59,19 @@ class PlayGameCommand extends Command
             return Command::SUCCESS;
         }
 
-        $result = $this->playGameUseCase->play($userId, $generatedNumbers, $selectedPosition, $parityEnum);
+        $result = $this->playGameUseCase->play($userId, $selectedPosition, $parityEnum);
 
         if (! $result->success) {
             $io->error("😔 {$result->errorMessage}");
             return Command::FAILURE;
         }
 
-        $io->success("🎉 Correct! You won {$result->earned} points. Your new balance is {$result->balance} points.");
+        if ($result->won) {
+            $io->success("🎉 Correct! You won {$result->earned} points. Your new balance is {$result->balance} points.");
+        } else {
+            $io->warning("😔 Not quite — you lost this round. Your balance is still {$result->balance} points.");
+        }
+
         return Command::SUCCESS;
     }
 }
