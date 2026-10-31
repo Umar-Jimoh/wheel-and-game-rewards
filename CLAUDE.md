@@ -26,7 +26,8 @@ src/
     Dto/                - Data transfer objects returned by use cases (decouples core from adapters)
     Dto/Request/        - Input DTOs populated from HTTP request bodies via #[MapRequestPayload]
   Infrastructure/     # Secondary/driven adapters — implement Port/Out interfaces
-    Persistence/InMemory/ - In-memory repository adapters (Phase 1 persistence per PRD §13)
+    Persistence/InMemory/ - In-memory repository adapters (superseded by Doctrine, Phase 2)
+    Persistence/Doctrine/  - Doctrine-backed repository adapters + custom DBAL types
     Random/                - Random number generation adapter
   UI/                 # Primary/driving adapters — call Port/In interfaces
     Cli/Command/        - Symfony Console command adapters
@@ -109,11 +110,37 @@ guessing, with the server holding the pending draw between requests:
   `RandomNumberGenerator`/`PendingGameRepository` adapters, `PlayGameCommand`, and
   both controllers
 
-**Known limitation**: `PendingGame` state is in-memory only, so it cannot survive
-across two separate HTTP requests in a normal PHP/Symfony deployment (each request
-boots a fresh container) — the start→play flow only works within a single process
-today (e.g. the CLI command, or a test). This resolves once Phase 2 lands real
-persistence.
+### Built (Phase 2 — Doctrine persistence)
+
+`InMemoryUserRepository`/`InMemorySpinRepository`/`InMemoryPendingGameRepository` are
+replaced by Doctrine-backed adapters, with Domain classes staying completely
+Doctrine-free (PRD §14) by mapping via XML files, not attributes:
+
+- `doctrine/orm`, `doctrine/doctrine-bundle`, `doctrine/doctrine-migrations-bundle`;
+  SQLite for local dev (`DATABASE_URL` in `.env`)
+- XML entity mappings under `config/doctrine/` (`User.orm.xml`, `Spin.orm.xml`,
+  `PendingGame.orm.xml`) — YAML mapping isn't available (`doctrine/orm` 3.x dropped it)
+- Custom DBAL types (`Infrastructure/Persistence/Doctrine/Type/`) convert value objects
+  to plain columns without Doctrine ever appearing in Domain: `PointType` (`Point` ↔
+  int), `MultiplierType` (`Multiplier` enum ↔ int), `GameType` (`Game`'s 5 numbers ↔
+  JSON string)
+- `Spin`/`PendingGame` each gained a persistence-only `private ?int $id = null` +
+  `getId()` — Doctrine hydrates by Reflection, so the identity property must physically
+  exist on the class even though nothing in Domain/Application ever reads it
+- `DoctrineUserRepository`, `DoctrineSpinRepository`, `DoctrinePendingGameRepository`
+  implement the existing output ports; `services.yaml` now aliases to these instead of
+  the in-memory adapters
+- Migrations live in `src/Migrations/` (`doctrine:migrations:diff` / `:migrate`) —
+  schema changes are no longer applied via `schema:create`/`schema:update`
+
+**This also fixes the earlier known limitation**: `PendingGame` state previously
+couldn't survive across two separate HTTP requests (each request boots a fresh
+container, so in-memory state was lost between `/games/start` and `/games/play`).
+With SQLite-backed persistence this now works correctly — verified by hitting both
+endpoints as genuinely separate curl processes.
+
+**Still missing**: there's no `CreateUser` use case or endpoint anywhere, so a real
+user has to be seeded directly into the database to test any flow manually.
 
 ### Built (HTTP error handling)
 
@@ -127,7 +154,7 @@ persistence.
 
 - **`Wheel` and `Reward` domain models** (PRD §9) — currently `Multiplier::applyTo()`
   on `Point` does the reward calculation inline; there's no explicit `Wheel` or `Reward` object
-- Real (Doctrine) persistence (Phase 2) — all repositories are still in-memory
+- `CreateUser` use case/endpoint — no way to create a real user through the app itself
 - Laravel migration (Phase 3) — not started; still pure Symfony
 
 ## Conventions observed in this codebase
@@ -163,6 +190,7 @@ php bin/console user:balance <userId>         # view balance
 php bin/console game:play <userId>            # play the number-guessing game (interactive)
 composer install
 ./bin/phpunit                                 # run tests
+php bin/console doctrine:migrations:migrate   # apply pending DB migrations
 ```
 
 ## HTTP endpoints
@@ -175,6 +203,5 @@ POST /users/{userId}/games/play    body: {"position": 0-4, "parity": "even"|"odd
 ```
 
 All return JSON; failures (invalid user, invalid state, validation errors) are
-`{"error": "..."}` with a 404/422 status rather than throwing. See the "Known
-limitation" note above — the two-step game flow needs a single process to work
-until Phase 2 persistence lands.
+`{"error": "..."}` with a 404/422 status rather than throwing. The two-step game
+flow now works correctly across separate requests since Phase 2 persistence landed.
