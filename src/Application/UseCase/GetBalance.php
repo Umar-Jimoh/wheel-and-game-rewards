@@ -6,7 +6,7 @@ namespace App\Application\UseCase;
 
 use App\Application\Port\In\GetBalanceUseCase;
 use App\Application\Port\Out\UserRepository;   
-use App\Application\Dto\GetbalanceResult; 
+use App\Application\Dto\GetBalanceResult; 
 
 final class GetBalance implements GetBalanceUseCase
 {
@@ -14,14 +14,14 @@ final class GetBalance implements GetBalanceUseCase
         private readonly UserRepository $userRepository
     ) {}
 
-    public function execute(int $userId): GetbalanceResult
+    public function execute(int $userId): GetBalanceResult
     {
         $user = $this->userRepository->findById($userId);
 
         if (! $user) {
-            return GetbalanceResult::failure('Invalid user id provided.');
+            return GetBalanceResult::failure('Invalid user id provided.');
         }
 
-        return GetbalanceResult::success($user->getBalance()->getAmount());
+        return GetBalanceResult::success($user->getBalance()->getAmount());
     }
 }

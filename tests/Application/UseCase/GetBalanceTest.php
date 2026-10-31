@@ -7,7 +7,7 @@ namespace App\Tests\Application\UseCase;
 use PHPUnit\Framework\TestCase;
 use App\Infrastructure\Persistence\InMemory\InMemoryUserRepository;
 use App\Application\UseCase\GetBalance;
-use App\Application\Dto\GetbalanceResult;
+use App\Application\Dto\GetBalanceResult;
 use App\Domain\Model\User;
 use App\Domain\Model\Point;
 
