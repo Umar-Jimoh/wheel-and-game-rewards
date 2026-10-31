@@ -6,12 +6,19 @@ namespace App\Domain\Model;
 
 final class Spin
 {
+    private ?int $id = null;
+
     public function __construct(
         private readonly int $userId,
         private readonly Point $spinCost,
         private readonly Multiplier $multiplierRolled,
         private readonly Point $rewardedPoint,
     ){    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     public function getUserId(): int
     {
