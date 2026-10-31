@@ -16,7 +16,7 @@ services:
 
     App\Application\Port\Out\UserRepository: '@App\Infrastructure\Persistence\Doctrine\DoctrineUserRepository'
     App\Application\Port\Out\SpinRepository: '@App\Infrastructure\Persistence\Doctrine\DoctrineSpinRepository'
-    App\Application\Port\Out\PendingGameRepository: '@App\Infrastructure\Persistence\InMemory\InMemoryPendingGameRepository'
+    App\Application\Port\Out\PendingGameRepository: '@App\Infrastructure\Persistence\Doctrine\DoctrinePendingGameRepository'
     App\Application\Port\Out\RandomMultiplierGenerator: '@App\Infrastructure\Random\RandomMultiplierGenerator'
     App\Application\Port\Out\RandomNumberGenerator: '@App\Infrastructure\Random\RandomNumberGenerator'
 
