@@ -8,8 +8,8 @@ use DomainException;
 
 final class SpinCostException extends DomainException
 {
-    public function __construct()
+    public function __construct(array $allowedSpinCosts)
     {
-        parent::__construct('Invalid spin cost.');
+        parent::__construct('Invalid spin cost. Allowed spin costs are: ' . implode(', ', $allowedSpinCosts) . '.');
     }
 }

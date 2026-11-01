@@ -14,7 +14,7 @@ final class SpinCost
         private readonly int $cost,
     ){
         if (!in_array($cost, self::ALLOWED_SPIN_COSTS)) {
-            throw new SpinCostException();
+            throw new SpinCostException(self::ALLOWED_SPIN_COSTS);
         }
     }
 

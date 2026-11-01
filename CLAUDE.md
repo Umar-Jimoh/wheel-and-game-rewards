@@ -165,7 +165,9 @@ user has to be seeded directly into the database to test any flow manually.
   throwing to the caller for expected failure cases (invalid user, insufficient points,
   invalid spin cost) — exceptions are caught inside the use case and converted to a
   failure DTO. Reserve real exceptions for programming errors / truly exceptional paths.
-- Domain exceptions extend `DomainException` and carry a fixed, descriptive message
+- Domain exceptions extend `DomainException` and carry a descriptive message — fixed
+  where there's nothing case-specific to add, or built from constructor data when it
+  helps (e.g. `SpinCostException` lists the actual allowed spin costs)
 - Value objects validate invariants in the constructor and throw immediately (e.g. `Point`
   rejects negative amounts, `SpinCost` rejects amounts outside the allowed list)
 - Tests live under `tests/` mirroring `src/` 1:1, use PHPUnit, one `test*` method per behavior
